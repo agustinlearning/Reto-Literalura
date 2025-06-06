@@ -7,7 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ConsultaApi {
-    URI direccion = URI.create("https://gutendex.com/books/?page=");
+    URI direccion = URI.create("https://gutendex.com/books/?title=");
 
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
