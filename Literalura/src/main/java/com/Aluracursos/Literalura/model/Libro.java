@@ -2,6 +2,8 @@ package com.Aluracursos.Literalura.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Entity
 @Table(name = "libros")
@@ -73,11 +75,20 @@ public class Libro {
     }
 
     // Metodo para mostrar información básica
+    // En la clase Libro.java
     @Override
     public String toString() {
-        return "Título: " + titulo +
-                ", Idioma: " + idioma +
-                ", Descargas: " + descargas +
-                ", Autores: " + autores.stream().map(Autor::getNombre).toList();
+        String nombresAutores = autores.stream()
+                .map(Autor::getNombre)
+                .collect(Collectors.joining(", "));
+        return String.format(
+                "--- LIBRO ---\n" +
+                        "Título: %s\n" +
+                        "Autor(es): %s\n" +
+                        "Idioma: %s\n" +
+                        "Descargas: %d\n" +
+                        "-------------\n",
+                titulo, nombresAutores, idioma, descargas
+        );
     }
 }

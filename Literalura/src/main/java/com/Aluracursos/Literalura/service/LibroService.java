@@ -1,87 +1,109 @@
 package com.Aluracursos.Literalura.service;
 
-import com.Aluracursos.Literalura.DTO.AutorDTO;
 import com.Aluracursos.Literalura.model.Autor;
 import com.Aluracursos.Literalura.model.Libro;
 import com.Aluracursos.Literalura.model.LibroData;
+import com.Aluracursos.Literalura.model.Result;
 import com.Aluracursos.Literalura.repository.AutorRepository;
 import com.Aluracursos.Literalura.repository.LibroRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importante para la consistencia
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LibroService {
     private final ConsultaApi consultaApi;
-    private final ObjectMapper objectMapper; // Jackson para parsear JSON
-    private LibroRepository libroRepository;
-    private AutorRepository autorRepository;
+    private final LibroRepository libroRepository;
+    private final AutorRepository autorRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // Puedes instanciarlo aquí
 
-
-
-    public LibroService(ConsultaApi consultaApi) {
+    // Constructor para la inyección de dependencias
+    public LibroService(ConsultaApi consultaApi, LibroRepository libroRepository, AutorRepository autorRepository) {
         this.consultaApi = consultaApi;
-        this.objectMapper = new ObjectMapper();
+        this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
     }
 
+    @Transactional
     public void buscarYGuardarLibro(String titulo) {
-        try {
-            String json = consultaApi.buscarLibroPorTitulo(titulo);
-            LibroData libroData = objectMapper.readValue(json, LibroData.class);
-
-            libroData.results().forEach(result -> {
-                // Verificar si el libro ya existe
-                if (!libroRepository.existsByTitulo(result.title())) {
-                    // Crear y guardar el libro
-                    Libro libro = new Libro(
-                            result.title(),
-                            result.languages().get(0),
-                            result.download_count()
-                    );
-
-                    // Guardar autores (primero necesitas crearlos)
-                    List<Autor> autores = result.authors().stream()
-                            .map(a -> new Autor(a.name()))
-                            .toList();
-                    libro.setAutores(autores);
-
-                    libroRepository.save(libro);
-                    System.out.println("Libro guardado: " + libro.getTitulo());
-                } else {
-                    System.out.println("El libro ya existe en la base de datos.");
-                }
-            });
-
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void listarLibrosRegistrados() {
-        List<Libro> libros = libroRepository.findAll();
-        libros.forEach(libro -> System.out.println(
-                "Título: " + libro.getTitulo() +
-                        ", Idioma: " + libro.getIdioma() +
-                        ", Descargas: " + libro.getDescargas()
-        ));
-    }
-
-    public void listarAutoresRegistrados() {
-        List<AutorDTO> autores = autorRepository.findAllAutorDTO();
-
-        if (autores.isEmpty()) {
-            System.out.println("No hay autores registrados.");
+        // 1. Verificar si el libro ya existe en la BD
+        Optional<Libro> libroExistente = libroRepository.findByTituloContainsIgnoreCase(titulo);
+        if (libroExistente.isPresent()) {
+            System.out.println("El libro ya existe en la base de datos.");
             return;
         }
 
-        System.out.println("\n=== Autores Registrados ===");
-        autores.forEach(autor -> System.out.println(
-                String.format("ID: %d - Nombre: %-20s - Libros: %d",
-                        autor.id(),
-                        autor.nombre(),
-                        autor.cantidadLibros())
-        ));
+        // 2. Si no existe, buscar en la API
+        String json = consultaApi.buscarLibroPorTitulo(titulo);
+        try {
+            LibroData libroData = objectMapper.readValue(json, LibroData.class);
+
+            // 3. Tomar el primer resultado de la API (si existe)
+            if (libroData != null && libroData.results() != null && !libroData.results().isEmpty()) {
+                Result primerResultado = libroData.results().get(0);
+
+                // 4. Crear y guardar el libro con sus autores
+                guardarLibroConAutores(primerResultado);
+
+            } else {
+                System.out.println("No se encontró ningún libro con ese título en la API.");
+            }
+        } catch (JsonProcessingException e) {
+            System.err.println("Error al procesar la respuesta JSON: " + e.getMessage());
+        }
+    }
+
+    private void guardarLibroConAutores(Result result) {
+        // 5. Mapear autores, buscándolos en la BD o creando nuevos
+        List<Autor> autores = result.authors().stream()
+                .map(autorData -> {
+                    // Busca si el autor ya existe por su nombre
+                    Optional<Autor> autorExistente = autorRepository.findByNombre(autorData.name());
+                    // Si existe, lo usa; si no, crea y guarda uno nuevo.
+                    return autorExistente.orElseGet(() -> autorRepository.save(new Autor(autorData.name())));
+                })
+                .collect(Collectors.toList());
+
+        // 6. Crear el objeto Libro
+        // Corrección para evitar error si la lista de idiomas está vacía
+        String idioma = result.languages().isEmpty() ? "Desconocido" : result.languages().get(0);
+
+        Libro libro = new Libro(
+                result.title(),
+                idioma,
+                result.download_count()
+        );
+
+        // 7. Asociar autores con el libro
+        libro.setAutores(autores);
+
+        // 8. Guardar el libro (gracias a la cascada, los autores se asociarán correctamente)
+        libroRepository.save(libro);
+        System.out.println("Libro guardado exitosamente: " + libro.getTitulo());
+    }
+
+    @Transactional(readOnly = true)
+    public void listarLibrosRegistrados() {
+        List<Libro> libros = libroRepository.findAll();
+        if (libros.isEmpty()){
+            System.out.println("No hay libros registrados.");
+            return;
+        }
+        libros.forEach(System.out::println); // Usamos el toString() de Libro
+    }
+
+    @Transactional(readOnly = true)
+    public void listarAutoresRegistrados() {
+        List<Autor> autores = autorRepository.findAll();
+        if (autores.isEmpty()){
+            System.out.println("No hay autores registrados.");
+            return;
+        }
+        autores.forEach(System.out::println); // Usamos el toString() de Autor
     }
 }
-

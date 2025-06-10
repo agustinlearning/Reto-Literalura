@@ -1,7 +1,7 @@
 package com.Aluracursos.Literalura;
 
-import com.Aluracursos.Literalura.service.ConsultaApi;
 import com.Aluracursos.Literalura.service.LibroService;
+import org.springframework.beans.factory.annotation.Autowired; // Importante
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,6 +10,8 @@ import java.util.Scanner;
 
 @SpringBootApplication
 public class LiteraluraApplication implements CommandLineRunner {
+
+	@Autowired
 	private LibroService libroService;
 
 	public static void main(String[] args) {
@@ -27,6 +29,12 @@ public class LiteraluraApplication implements CommandLineRunner {
 			System.out.println("4. Salir");
 			System.out.print("Elija una opción: ");
 
+			// Validar que la entrada sea un número
+			if (!scanner.hasNextInt()) {
+				System.out.println("Por favor, ingrese un número válido.");
+				scanner.next(); // Limpiar la entrada no válida
+				continue;
+			}
 			int opcion = scanner.nextInt();
 			scanner.nextLine(); // Limpiar buffer
 
