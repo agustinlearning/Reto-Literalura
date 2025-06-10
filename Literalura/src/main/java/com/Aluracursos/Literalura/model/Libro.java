@@ -72,7 +72,7 @@ public class Libro {
         this.autores = autores;
     }
 
-    // Método para mostrar información básica
+    // Metodo para mostrar información básica
     @Override
     public String toString() {
         return "Título: " + titulo +
