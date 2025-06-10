@@ -65,7 +65,8 @@ public class LibroService {
                     // Busca si el autor ya existe por su nombre
                     Optional<Autor> autorExistente = autorRepository.findByNombre(autorData.name());
                     // Si existe, lo usa; si no, crea y guarda uno nuevo.
-                    return autorExistente.orElseGet(() -> autorRepository.save(new Autor(autorData.name())));
+                    Autor nuevoAutor = new Autor(autorData.name(), autorData.birth_year(), autorData.death_year());
+                    return autorRepository.save(nuevoAutor);
                 })
                 .collect(Collectors.toList());
 
@@ -115,6 +116,17 @@ public class LibroService {
         } else {
             System.out.println("Libros encontrados en '" + idioma + "':");
             libros.forEach(System.out::println); // Reciclando el toString() de la clase Libro.java
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public void listarAutoresVivosEnAno(int ano) {
+        List<Autor> autores = autorRepository.findAutoresVivosEnAno(ano);
+        if (autores.isEmpty()) {
+            System.out.println("No se encontraron autores vivos en el año " + ano + ".");
+        } else {
+            System.out.println("Autores vivos en el año " + ano + ":");
+            autores.forEach(System.out::println);
         }
     }
 }

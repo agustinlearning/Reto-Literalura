@@ -24,6 +24,18 @@ public class LiteraluraApplication implements CommandLineRunner {
 		libroService.listarLibrosPorIdioma(idioma);
 	}
 
+	private void listarAutoresVivos(Scanner scanner) {
+		System.out.print("Ingrese el año para buscar autores vivos: ");
+		try {
+			int ano = scanner.nextInt();
+			scanner.nextLine();
+			libroService.listarAutoresVivosEnAno(ano);
+		} catch (java.util.InputMismatchException e) {
+			System.out.println("Entrada inválida. Por favor, ingrese un año válido (número).");
+			scanner.nextLine();
+		}
+	}
+
 	@Autowired
 	private LibroService libroService;
 
@@ -40,8 +52,10 @@ public class LiteraluraApplication implements CommandLineRunner {
 			System.out.println("2. Mostrar libros registrados");
 			System.out.println("3. Mostrar autores registrados");
 			System.out.println("4. Listar libros por idioma ej: en(ingles) es(español)");
+			System.out.println("5. Listar autores vivos en un año determinado");
 			System.out.println("0. Salir");
 			System.out.print("Elija una opción: ");
+
 
 			// Validar que la entrada sea un número
 			if (!scanner.hasNextInt()) {
@@ -67,6 +81,8 @@ public class LiteraluraApplication implements CommandLineRunner {
 				case 4:
 					listarLibrosPorIdioma(scanner);
 					break;
+				case 5:
+					listarAutoresVivos(scanner);
 				case 0:
 					System.out.println("¡Hasta luego!");
 					System.exit(0);
