@@ -94,7 +94,7 @@ public class LibroService {
             System.out.println("No hay libros registrados.");
             return;
         }
-        libros.forEach(System.out::println); // Usamos el toString() de Libro
+        libros.forEach(System.out::println); //Reciclando el toString() de la clase Libro.java
     }
 
     @Transactional(readOnly = true)
@@ -104,6 +104,17 @@ public class LibroService {
             System.out.println("No hay autores registrados.");
             return;
         }
-        autores.forEach(System.out::println); // Usamos el toString() de Autor
+        autores.forEach(System.out::println); // Reciclando el toString() de la clase Autor.java
+    }
+
+    @Transactional(readOnly = true)
+    public void listarLibrosPorIdioma(String idioma) {
+        List<Libro> libros = libroRepository.findByIdioma(idioma);
+        if (libros.isEmpty()) {
+            System.out.println("No se encontraron libros en el idioma '" + idioma + "'.");
+        } else {
+            System.out.println("Libros encontrados en '" + idioma + "':");
+            libros.forEach(System.out::println); // Reciclando el toString() de la clase Libro.java
+        }
     }
 }
