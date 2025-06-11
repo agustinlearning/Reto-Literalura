@@ -57,17 +57,19 @@ public class LibroService {
     }
 
     private void guardarLibroConAutores(Result result) {
-        //  Mapear autores, buscándolos en la BD o creando nuevos
+        // Mapear autores, buscándolos en la BD o creando nuevos
         List<Autor> autores = result.authors().stream()
                 .map(autorData -> {
-                    // Busca si el autor ya existe por su nombre
+                    // 1. Busca si el autor ya existe
                     Optional<Autor> autorExistente = autorRepository.findByNombre(autorData.name());
-                    // Si existe, lo usa; si no, crea y guarda uno nuevo.
-                    Autor nuevoAutor = new Autor(autorData.name(), autorData.birth_year(), autorData.death_year());
-                    return autorRepository.save(nuevoAutor);
+
+                    // 2. Si existe, lo retorna; si no, ejecuta el código para crear y guardar uno nuevo.
+                    return autorExistente.orElseGet(() -> {
+                        Autor autorNuevo = new Autor(autorData.name(), autorData.birth_year(), autorData.death_year());
+                        return autorRepository.save(autorNuevo);
+                    });
                 })
                 .collect(Collectors.toList());
-
         //  Crear el objeto Libro
         // Corrección para evitar error si la lista de idiomas está vacía
         String idioma = result.languages().isEmpty() ? "Desconocido" : result.languages().get(0);
