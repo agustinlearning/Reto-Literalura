@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Scanner;
+// si lees esto rescuerdame pasar esto a una nueva clase clase principal
 
 @SpringBootApplication
 public class LiteraluraApplication implements CommandLineRunner {
