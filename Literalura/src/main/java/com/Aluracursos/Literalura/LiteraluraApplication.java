@@ -81,6 +81,7 @@ public class LiteraluraApplication implements CommandLineRunner {
 					break;
 				case 5:
 					listarAutoresVivos(scanner);
+					break;
 				case 0:
 					System.out.println("¡Hasta luego!");
 					System.exit(0);
