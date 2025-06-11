@@ -1,13 +1,11 @@
 package com.Aluracursos.Literalura;
 
-import com.Aluracursos.Literalura.model.Libro;
 import com.Aluracursos.Literalura.service.LibroService;
-import org.springframework.beans.factory.annotation.Autowired; // Importante
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.List;
 import java.util.Scanner;
 
 @SpringBootApplication
@@ -51,7 +49,7 @@ public class LiteraluraApplication implements CommandLineRunner {
 			System.out.println("1. Buscar libro por título");
 			System.out.println("2. Mostrar libros registrados");
 			System.out.println("3. Mostrar autores registrados");
-			System.out.println("4. Listar libros por idioma ej: en(ingles) es(español)");
+			System.out.println("4. Listar libros por idioma");
 			System.out.println("5. Listar autores vivos en un año determinado");
 			System.out.println("0. Salir");
 			System.out.print("Elija una opción: ");
