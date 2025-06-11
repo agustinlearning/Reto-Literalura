@@ -45,7 +45,7 @@ public class LiteraluraApplication implements CommandLineRunner {
 	public void run(String... args) {
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
-			System.out.println("\n=== LiterAlura ===");
+			System.out.println("\n=== LiterAlura by Agustin===");
 			System.out.println("1. Buscar libro por título");
 			System.out.println("2. Mostrar libros registrados");
 			System.out.println("3. Mostrar autores registrados");
