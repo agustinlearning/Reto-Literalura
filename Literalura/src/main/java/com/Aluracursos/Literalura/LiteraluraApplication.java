@@ -28,7 +28,7 @@ public class LiteraluraApplication implements CommandLineRunner {
 			int ano = scanner.nextInt();
 			scanner.nextLine();
 			libroService.listarAutoresVivosEnAno(ano);
-		} catch (java.util.InputMismatchException e) {
+		} catch (java.util.InputMismatchException e) { // si el usuario no introduce un numero
 			System.out.println("Entrada inválida. Por favor, ingrese un año válido (número).");
 			scanner.nextLine();
 		}

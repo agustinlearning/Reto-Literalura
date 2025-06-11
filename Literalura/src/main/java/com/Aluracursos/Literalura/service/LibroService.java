@@ -31,23 +31,21 @@ public class LibroService {
 
     @Transactional
     public void buscarYGuardarLibro(String titulo) {
-        // 1. Verificar si el libro ya existe en la BD
+        //  Verificar si el libro ya existe en la BD
         Optional<Libro> libroExistente = libroRepository.findByTituloContainsIgnoreCase(titulo);
         if (libroExistente.isPresent()) {
             System.out.println("El libro ya existe en la base de datos.");
             return;
         }
 
-        // 2. Si no existe, buscar en la API
+        // Si no existe, buscar en la API
         String json = consultaApi.buscarLibroPorTitulo(titulo);
         try {
             LibroData libroData = objectMapper.readValue(json, LibroData.class);
 
-            // 3. Tomar el primer resultado de la API (si existe)
             if (libroData != null && libroData.results() != null && !libroData.results().isEmpty()) {
                 Result primerResultado = libroData.results().get(0);
 
-                // 4. Crear y guardar el libro con sus autores
                 guardarLibroConAutores(primerResultado);
 
             } else {
@@ -59,7 +57,7 @@ public class LibroService {
     }
 
     private void guardarLibroConAutores(Result result) {
-        // 5. Mapear autores, buscándolos en la BD o creando nuevos
+        //  Mapear autores, buscándolos en la BD o creando nuevos
         List<Autor> autores = result.authors().stream()
                 .map(autorData -> {
                     // Busca si el autor ya existe por su nombre
@@ -70,7 +68,7 @@ public class LibroService {
                 })
                 .collect(Collectors.toList());
 
-        // 6. Crear el objeto Libro
+        //  Crear el objeto Libro
         // Corrección para evitar error si la lista de idiomas está vacía
         String idioma = result.languages().isEmpty() ? "Desconocido" : result.languages().get(0);
 
@@ -80,7 +78,7 @@ public class LibroService {
                 result.download_count()
         );
 
-        // 7. Asociar autores con el libro
+        //  Asociar autores con el libro
         libro.setAutores(autores);
 
         // 8. Guardar el libro (gracias a la cascada, los autores se asociarán correctamente)

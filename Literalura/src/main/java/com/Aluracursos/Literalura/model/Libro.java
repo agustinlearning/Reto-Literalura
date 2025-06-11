@@ -24,7 +24,7 @@ public class Libro {
     )
     private List<Autor> autores;
 
-    // Constructor vacío (obligatorio para JPA)
+    // IMPORTANTE Constructor vacío (obligatorio para JPA)
     public Libro() {}
 
     // Constructor para crear libros desde los datos de la API
